@@ -31,7 +31,22 @@ logger.setLevel(INFO)
 app.app_context().push()
 
 
-@scheduler.task("interval", id="fetch_emails", minutes=0.5, misfire_grace_time=900, max_instances=1, coalesce=True)
+# @scheduler.task(
+#     "cron",
+#     id="fetch_emails",
+#     minute="*",  # Every minute
+#     misfire_grace_time=900,
+#     max_instances=1,
+#     coalesce=True,
+# )
+@scheduler.task(
+    "interval",
+    id="fetch_emails",
+    seconds=10,
+    misfire_grace_time=900,
+    max_instances=1,
+    coalesce=True,
+)
 def fetch_and_add_emails():
     user_email = os.getenv("IMAP_EMAIL")
     password = os.getenv("IMAP_PASSWORD")
@@ -43,16 +58,16 @@ def fetch_and_add_emails():
         for email in emails:
             if Email.query.filter_by(message_id=email["id"]).first():
                 continue
-            email = Email(
+            new_email = Email(
                 timestamp=email["timestamp"],
                 message_id=email["id"],
                 index=email["index"],
                 sender=email["sender"],
                 subject=email["subject"],
             )
-            db.session.add(email)
+            db.session.add(new_email)
 
-            logger.info(f"Processed email {email.message_id}")
+            logger.info(f"Processed email {email['id']}")
 
         db.session.commit()
 
@@ -89,5 +104,10 @@ def index():
 
 
 if __name__ == "__main__":
+    with open("scheduler.log", "w"):
+        pass
+
     scheduler.start()
-    app.run(debug=True)
+
+    # app.run(debug=True)
+    app.run(debug=False)
