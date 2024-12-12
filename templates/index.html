@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Emails</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    </head>
+    <body>
+        <a href="{{ url_for('logs') }}">View Logs</a>
+        <h1>Emails</h1>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Sender</th>
+                    <th>Subject</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for email in emails %}
+                <tr>
+                    <td>{{ email.sender }}</td>
+                    <td>{{ email.subject }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </body>
+</html>
